@@ -1,38 +1,52 @@
 # Portfolio Bet Prioritizer
 
-An interactive weighted-scoring tool for early-R&D portfolio trade-offs: set leadership's priorities, watch the ranking move, and see exactly which weight change would flip the #1 pick.
+Ranks R&D bets by leadership's priorities and shows how close the call really is.
 
-**[Live demo](https://portfolio-bet-prioritizer.vercel.app)** — works immediately, no API key or setup required. Everything runs in your browser; nothing you enter is stored or sent anywhere. Please use fictional/sample data only.
+**[Try the live demo](https://portfolio-bet-prioritizer.vercel.app)**. It works straight away with no setup, runs entirely in your browser, and stores nothing. All data is fictional or synthetic.
+
+## Why I built it
+
+I've watched portfolio meetings turn into a contest between programs. What helped every time was stepping back to agree what the organisation was trying to achieve. This tool puts that step first.
+
+## The problem
+
+R&D leadership teams decide where the next discovery investment goes under competing priorities, and the discussion easily turns into 'my program versus yours'.
+
+## What I built
+
+A live scoring tool for four research bets across five criteria: unmet need, scientific odds, competition, fit with existing strengths and speed to an answer. Pick a leadership lens or set your own weights, and it shows the smallest change in priorities that would put a different bet on top.
 
 ## Who it's for
 
-Portfolio strategy, R&D leadership, and program leads who need a ranking people trust rather than argue with.
-
-## Why it matters
-
-R&D leadership teams decide where the next discovery dollar goes under competing priorities, and the debate often turns into 'my program vs. yours' instead of 'what are we optimizing for?' This tool makes the trade-off explicit and shows how fragile the #1 pick is, so leadership agrees on priorities before arguing about programs.
+Portfolio strategy, R&D leadership and program leads who need a ranking people trust.
 
 ## What it does
 
-- Choose a leadership lens (patient-impact first, capital-efficient, differentiation-led) or set weights yourself
-- See the live ranking and the biggest driver behind each bet's score
-- Get a robustness verdict — fragile, moderate, or robust — and the exact weight change that would flip the leader
-- Edit any 0–10 score to test how much one contested judgement moves the outcome
+- Choose a leadership lens or set the weights yourself
+- See the ranking and the biggest driver behind each score
+- Get a clear verdict on how robust the top choice is
+- Edit any score to test how much one disputed judgement matters
 
-## Product decisions that mattered more than the model
+## Decisions that shaped it
 
-1. **Agree weights before rankings** — the conversation moves to priorities, not programs
-2. **Robustness as an output** — not just who's #1, but how sure we should be
-3. **Fully inspectable** — no model in the loop
+1. **Priorities first:** agreeing the weights moves the conversation away from favourite programs.
+2. **Confidence is part of the answer:** it shows how robust the top choice is.
+3. **Fully transparent:** every score and weight is on screen.
+
+## Key takeaway
+
+If a one point change in priorities flips the ranking, the tool says so plainly, which is often the most useful thing to know.
 
 ## Built with
 
-- HTML, CSS, JavaScript (single-file prototype, no framework, no build step)
+- HTML, CSS and JavaScript in a single file
 
-## Run locally
+## Run it locally
 
-Open `index.html` in any browser — no install needed.
+Open `index.html` in any browser. There's nothing to install.
 
-## Status
+## About this project
 
-This is a prototype built to explore a problem space, using fictional/synthetic data — not a finished product and not connected to any organization's real systems. Built by [Jane Natividad](https://github.com/jane-natividad) — see more at [jane-natividad.github.io](https://jane-natividad.github.io).
+This is a working prototype I built to explore a real problem space. It uses illustrative, fictional data and isn't connected to any organisation's systems. You can find more of my work at [jane-natividad.github.io](https://jane-natividad.github.io).
+
+Built by [Jane Natividad](https://github.com/jane-natividad).
