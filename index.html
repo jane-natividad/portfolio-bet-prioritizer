@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Where to Bet Next — Portfolio Bet Prioritizer | Jane Natividad</title>
+<meta name="description" content="An interactive weighted-scoring tool that makes early-R&D portfolio trade-offs explicit: set the priorities, watch the ranking move, and see exactly which weight would flip the leader.">
+<style>
+  * { box-sizing: border-box; }
+  :root {
+    --accent: #0071e3; --accent-soft: #e8f2ff; --accent-border: #cce2ff;
+    --ink: #1d1d1f; --ink-soft: #48484a; --muted: #6e6e73;
+    --hairline: #e5e5e7; --panel: #f5f5f7; --bg: #ffffff;
+    --good: #1a7f4e; --good-soft: #e7f6ee;
+    --warn: #9a6b00; --warn-soft: #fff6e0;
+    --bad: #b3261e; --bad-soft: #fdecea;
+  }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif; }
+  .wrap { max-width: 800px; margin: 0 auto; padding: 56px 24px 80px; }
+  .back-link { display: inline-block; font-size: 12px; color: var(--muted); text-decoration: none; margin-bottom: 22px; }
+  .back-link:hover { color: var(--accent); }
+  .eyebrow { font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); font-weight: 600; margin-bottom: 14px; }
+  h1 { font-size: 30px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 14px; line-height: 1.18; text-wrap: balance; }
+  h2 { font-size: 17px; font-weight: 650; margin: 0 0 8px; letter-spacing: -0.01em; }
+  .byline { font-size: 12.8px; color: var(--muted); margin: 0 0 28px; }
+  .byline a { color: var(--muted); }
+  p { font-size: 14.5px; line-height: 1.62; color: var(--ink-soft); margin: 0 0 16px; }
+  .lede { font-size: 15.5px; line-height: 1.6; color: var(--ink); background: var(--panel); border-radius: 14px; padding: 20px 24px; margin: 0 0 28px; }
+  .section-label { font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin: 36px 0 14px; }
+  .section-sub { font-size: 13px; color: var(--ink-soft); margin: -6px 0 14px; line-height: 1.55; }
+  .panel { background: var(--panel); border-radius: 14px; padding: 20px 22px; margin: 0 0 18px; }
+  .card { border: 1px solid var(--hairline); border-radius: 12px; padding: 14px 16px; background: #fff; }
+  .card.top { border-color: var(--accent-border); background: var(--accent-soft); }
+  .stack { display: flex; flex-direction: column; gap: 10px; }
+  .pipeline { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 8px; }
+  .pipe-step { flex: 1 1 auto; min-width: 130px; background: var(--panel); border: 1px solid var(--hairline); border-radius: 10px; padding: 10px 12px; font-size: 11.3px; color: var(--ink-soft); line-height: 1.4; }
+  .pipe-step b { display: block; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); margin-bottom: 3px; }
+  .pipeline-note { font-size: 11.5px; color: var(--muted); margin: 0 0 24px; }
+  .btn { font-size: 12px; font-weight: 600; color: var(--accent); background: #fff; border: 1px solid var(--accent-border); border-radius: 8px; padding: 7px 13px; cursor: pointer; font-family: inherit; }
+  .btn:hover { background: var(--accent-soft); }
+  .btn.primary { color: #fff; background: var(--accent); border-color: var(--accent); }
+  .btn.primary:hover { background: #005bbf; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { font-size: 11.8px; color: var(--accent); background: #fff; border: 1px solid var(--accent-border); border-radius: 999px; padding: 6px 13px; cursor: pointer; font-family: inherit; text-align: left; }
+  .chip:hover { background: var(--accent-soft); }
+  .chip.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .tag { display: inline-block; font-size: 10.3px; font-weight: 700; letter-spacing: 0.04em; border-radius: 999px; padding: 3px 9px; white-space: nowrap; }
+  .tag.good { color: var(--good); background: var(--good-soft); }
+  .tag.warn { color: var(--warn); background: var(--warn-soft); }
+  .tag.bad { color: var(--bad); background: var(--bad-soft); }
+  .tag.info { color: var(--accent); background: var(--accent-soft); }
+  .tag.mute { color: var(--muted); background: var(--panel); }
+  .bar-track { height: 7px; background: var(--hairline); border-radius: 999px; overflow: hidden; }
+  .bar-fill { height: 100%; background: var(--accent); border-radius: 999px; transition: width 0.25s ease; }
+  input[type=text], input[type=password], select, textarea { font-family: inherit; font-size: 13px; padding: 9px 12px; border-radius: 8px; border: 1px solid var(--hairline); background: #fff; color: var(--ink); }
+  textarea { width: 100%; resize: vertical; line-height: 1.5; }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .gov-grid { display: flex; flex-direction: column; gap: 10px; margin: 0 0 32px; }
+  .gov-item { display: flex; gap: 12px; border: 1px solid var(--hairline); border-radius: 12px; padding: 13px 16px; }
+  .gov-icon { flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 12.5px; font-weight: 700; }
+  .gov-text b { display: block; font-size: 12.8px; color: var(--ink); margin-bottom: 2px; }
+  .gov-text span { font-size: 12.2px; color: var(--ink-soft); line-height: 1.55; }
+  .not-list { font-size: 12.5px; color: var(--ink-soft); line-height: 1.7; margin: 0 0 32px; padding-left: 20px; }
+  .not-list li { margin-bottom: 6px; }
+  .why { font-size: 13.3px; font-style: italic; color: var(--ink); background: var(--panel); border-radius: 14px; padding: 18px 22px; margin: 0 0 32px; line-height: 1.58; }
+  .disclosure { font-size: 11.5px; line-height: 1.55; color: var(--muted); background: var(--panel); border-radius: 10px; padding: 12px 16px; margin: 0 0 32px; }
+  pre.out { white-space: pre-wrap; word-break: break-word; background: var(--panel); border-radius: 10px; padding: 14px 16px; font-size: 12px; line-height: 1.6; color: var(--ink-soft); font-family: ui-monospace, "SF Mono", Menlo, monospace; margin: 0; }
+  table.grid { width: 100%; border-collapse: collapse; font-size: 12.3px; }
+  table.grid th { text-align: left; font-size: 10.3px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 600; padding: 8px 8px; border-bottom: 1px solid var(--hairline); }
+  table.grid td { padding: 9px 8px; border-bottom: 1px solid var(--hairline); color: var(--ink-soft); vertical-align: top; }
+  .scroll-x { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  footer { border-top: 1px solid var(--hairline); padding-top: 20px; font-size: 12px; color: var(--muted); }
+  footer a { color: var(--accent); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+  @media (max-width: 480px) { .wrap { padding: 40px 16px 60px; } h1 { font-size: 24px; } }
+
+  .weights { display: flex; flex-direction: column; gap: 16px; }
+  .weight-row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 6px 14px; }
+  .weight-row label { font-size: 12.8px; font-weight: 600; color: var(--ink); }
+  .weight-row .val { font-size: 12.5px; font-variant-numeric: tabular-nums; color: var(--accent); font-weight: 600; text-align: right; min-width: 34px; }
+  .weight-row input[type=range] { grid-column: 1 / -1; width: 100%; accent-color: var(--accent); }
+  .weight-total { font-size: 11.3px; color: var(--muted); }
+  .bet-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 4px; }
+  .bet-name { font-size: 14.5px; font-weight: 600; color: var(--ink); }
+  .bet-score { font-size: 15px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .bet-rank { font-size: 10.3px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .card.top .bet-rank { color: var(--accent); }
+  .bet-desc { font-size: 12.3px; color: var(--ink-soft); line-height: 1.5; margin: 0 0 10px; }
+  .bet-why { font-size: 11.5px; color: var(--muted); margin-top: 8px; }
+  .score-in { width: 52px; padding: 5px 6px; text-align: center; font-variant-numeric: tabular-nums; }
+  .flip { font-size: 13px; line-height: 1.6; color: var(--ink); }
+  .flip li { margin-bottom: 6px; }
+  .preset-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 18px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back-link" href="https://jane-natividad.github.io">&larr; Back to portfolio</a>
+  <div class="eyebrow">Portfolio Strategy · Working Prototype</div>
+  <h1>Where to bet next: make the R&amp;D portfolio trade-off explicit before the debate starts</h1>
+  <p class="byline">Jane Natividad &nbsp;&middot;&nbsp; <a href="https://jane-natividad.github.io">jane-natividad.github.io</a> &nbsp;&middot;&nbsp; <a href="https://github.com/jane-natividad/portfolio-bet-prioritizer">View on GitHub</a></p>
+
+  <div class="lede">Every early-R&amp;D leadership team runs some version of this call: with finite discovery capacity, how much goes to a hot, fast-moving area versus doubling down where you already have platform depth? There usually isn't one right answer &mdash; there's a right answer <em>for a given set of priorities</em>. This tool doesn't pick a winner. It makes the trade-off visible, shows how fragile the current #1 is, and tells you exactly which priority shift would change the answer.</div>
+
+  <div class="section-label">1 · Start from a leadership lens, or set your own</div>
+  <div class="preset-row" id="presets"></div>
+  <div class="panel"><div class="weights" id="weights"></div></div>
+
+  <div class="section-label">2 · Resulting ranking</div>
+  <div class="stack" id="bets"></div>
+
+  <div class="section-label">3 · How robust is the #1 pick?</div>
+  <p class="section-sub">For each criterion, the smallest single weight change that would put a different bet on top &mdash; the question a portfolio committee should ask before trusting a ranking.</p>
+  <div class="card"><ul class="flip" id="flip"></ul></div>
+
+  <div class="section-label">4 · The scores behind it (editable)</div>
+  <p class="section-sub">0&ndash;10 judgement scores per bet. Change any one to see how much a single contested score moves the outcome.</p>
+  <div class="card scroll-x"><table class="grid" id="score-table"></table></div>
+
+  <div class="section-label">Design choices</div>
+  <div class="gov-grid">
+    <div class="gov-item"><div class="gov-icon">1</div><div class="gov-text"><b>Agree the weights, then the ranking</b><span>The scores are fixed judgement calls; what moves is how much leadership values each criterion. Getting research, finance, and commercial to agree on weights first turns "my program vs. yours" into "what are we optimizing for?"</span></div></div>
+    <div class="gov-item"><div class="gov-icon">2</div><div class="gov-text"><b>Robustness is a first-class output</b><span>A ranking that flips with a 3-point weight change is a coin toss dressed up as analysis. The robustness check says so out loud.</span></div></div>
+    <div class="gov-item"><div class="gov-icon">3</div><div class="gov-text"><b>Fully deterministic</b><span>No model in the loop. Every position traces to a score and a weight you can see and change.</span></div></div>
+  </div>
+
+  <div class="why">"Slide 'unmet need' to the top and the slow, hard bet wins. Slide 'speed to proof-of-concept' up and the calculus flips. Neither is wrong. The job isn't finding the answer &mdash; it's getting everyone to agree on the weights before the debate starts, so the ranking is trusted, not argued with."</div>
+
+  <div class="disclosure">Prototype with illustrative data. The four therapeutic bets reflect broadly known industry dynamics; the 0&ndash;10 scores are directional judgement calls made for demonstration, not any organization's internal data.</div>
+
+  <footer>Built by <a href="https://jane-natividad.github.io">Jane Natividad</a>. No frameworks, no build step &mdash; a single static page and plain JavaScript. Companion to <a href="https://evidence-prioritization-copilot.vercel.app">Evidence, Prioritized</a>.</footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var CRITERIA = [
+    { key: "need",  label: "Unmet medical need", note: "how far current standard of care falls short" },
+    { key: "tract", label: "Scientific tractability", note: "probability of technical success given today's biology and modality maturity" },
+    { key: "diff",  label: "Competitive differentiation", note: "white space rather than a crowded field" },
+    { key: "fit",   label: "Platform fit", note: "how much existing capability and expertise this leverages" },
+    { key: "speed", label: "Speed to proof-of-concept", note: "how quickly a bet can be de-risked or killed" }
+  ];
+  var BETS = [
+    { name: "Metabolic & cardiometabolic expansion", desc: "Next-generation incretin combinations building on validated mechanisms and recently in-licensed assets.", scores: { need: 6, tract: 8, diff: 3, fit: 8, speed: 8 } },
+    { name: "Neurodegeneration", desc: "Next-wave targets beyond amyloid clearance, in a field still searching for its second validated mechanism.", scores: { need: 9, tract: 4, diff: 6, fit: 7, speed: 3 } },
+    { name: "Immunology & autoimmune disease", desc: "Deeper investment in inflammatory targets adjacent to an existing biologics platform.", scores: { need: 7, tract: 7, diff: 5, fit: 8, speed: 6 } },
+    { name: "Retinal & ophthalmic disease", desc: "Follow-on innovation in an area with an established franchise and delivery platform.", scores: { need: 6, tract: 7, diff: 7, fit: 7, speed: 6 } }
+  ];
+  var PRESETS = [
+    { name: "Equal weights", w: { need: 20, tract: 20, diff: 20, fit: 20, speed: 20 } },
+    { name: "Patient-impact first", w: { need: 45, tract: 15, diff: 20, fit: 10, speed: 10 } },
+    { name: "Capital-efficient", w: { need: 10, tract: 25, diff: 10, fit: 25, speed: 30 } },
+    { name: "Differentiation-led", w: { need: 20, tract: 15, diff: 40, fit: 10, speed: 15 } }
+  ];
+  var weights = Object.assign({}, PRESETS[0].w);
+  var activePreset = 0;
+
+  var weightsEl = document.getElementById("weights");
+  var presetsEl = document.getElementById("presets");
+
+  PRESETS.forEach(function (p, i) {
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "chip"; b.textContent = p.name;
+    b.addEventListener("click", function () {
+      weights = Object.assign({}, p.w); activePreset = i;
+      CRITERIA.forEach(function (c) { document.getElementById("w-" + c.key).value = weights[c.key]; });
+      render();
+    });
+    presetsEl.appendChild(b);
+  });
+
+  CRITERIA.forEach(function (c) {
+    var row = document.createElement("div"); row.className = "weight-row";
+    row.innerHTML = '<label for="w-' + c.key + '" title="' + c.note + '">' + c.label + '</label><span class="val" id="v-' + c.key + '"></span>'
+      + '<input type="range" min="0" max="100" step="1" id="w-' + c.key + '" value="' + weights[c.key] + '">';
+    row.querySelector("input").addEventListener("input", function (e) {
+      weights[c.key] = parseInt(e.target.value, 10); activePreset = -1; render();
+    });
+    weightsEl.appendChild(row);
+  });
+  var totalEl = document.createElement("div"); totalEl.className = "weight-total"; weightsEl.appendChild(totalEl);
+
+  function scoreOf(bet, w) {
+    var tw = 0, s = 0;
+    CRITERIA.forEach(function (c) { tw += w[c.key]; s += bet.scores[c.key] * w[c.key]; });
+    return tw > 0 ? s / tw : 0;
+  }
+  function ranked(w) {
+    return BETS.map(function (b) { return { bet: b, score: scoreOf(b, w) }; })
+      .sort(function (a, b) { return b.score - a.score; });
+  }
+  function topDriver(bet, w) {
+    var best = null, bestV = -1;
+    CRITERIA.forEach(function (c) { var v = bet.scores[c.key] * w[c.key]; if (v > bestV) { bestV = v; best = c; } });
+    return best;
+  }
+
+  function renderTable() {
+    var t = document.getElementById("score-table");
+    var html = "<tr><th>Bet</th>" + CRITERIA.map(function (c) { return "<th>" + c.label + "</th>"; }).join("") + "</tr>";
+    BETS.forEach(function (b, bi) {
+      html += "<tr><td><b style='color:var(--ink)'>" + b.name + "</b></td>" + CRITERIA.map(function (c) {
+        return '<td><input class="score-in" type="number" min="0" max="10" step="1" data-b="' + bi + '" data-c="' + c.key + '" value="' + b.scores[c.key] + '" aria-label="' + b.name + ' ' + c.label + '"></td>';
+      }).join("") + "</tr>";
+    });
+    t.innerHTML = html;
+    t.querySelectorAll("input").forEach(function (inp) {
+      inp.addEventListener("input", function () {
+        var v = Math.max(0, Math.min(10, parseFloat(inp.value) || 0));
+        BETS[+inp.dataset.b].scores[inp.dataset.c] = v; render(true);
+      });
+    });
+  }
+
+  function renderFlip(order) {
+    var leader = order[0].bet;
+    var items = [];
+    CRITERIA.forEach(function (c) {
+      var found = null;
+      [1, -1].forEach(function (dir) {
+        for (var d = 1; d <= 100; d++) {
+          var nv = weights[c.key] + dir * d;
+          if (nv < 0 || nv > 100) break;
+          var w = Object.assign({}, weights); w[c.key] = nv;
+          var r = ranked(w);
+          if (r[0].bet !== leader) {
+            if (!found || d < found.d) found = { d: d, dir: dir, to: nv, winner: r[0].bet.name };
+            break;
+          }
+        }
+      });
+      if (found) items.push(found.d + "|" + "<b>" + c.label + "</b> " + (found.dir > 0 ? "up" : "down") + " by " + found.d + " points (to " + found.to + "%) &rarr; <b>" + found.winner + "</b> takes #1.");
+      else items.push("999|<b>" + c.label + "</b>: no change to this weight alone moves " + leader.name + " off #1.");
+    });
+    items.sort(function (a, b) { return parseInt(a, 10) - parseInt(b, 10); });
+    var closest = parseInt(items[0], 10);
+    var verdict = closest <= 5 ? '<span class="tag bad">Fragile</span> A small shift in priorities changes the answer &mdash; settle the weights before presenting a winner.'
+      : closest <= 15 ? '<span class="tag warn">Moderate</span> The lead holds under small disagreements, but not large ones.'
+      : '<span class="tag good">Robust</span> The leader survives sizeable disagreement on any single criterion.';
+    document.getElementById("flip").innerHTML = '<li style="list-style:none;margin-left:-20px;margin-bottom:10px">' + verdict + "</li>"
+      + items.map(function (s) { return "<li>" + s.split("|")[1] + "</li>"; }).join("");
+  }
+
+  function render(skipTable) {
+    var tw = CRITERIA.reduce(function (s, c) { return s + weights[c.key]; }, 0);
+    CRITERIA.forEach(function (c) { document.getElementById("v-" + c.key).textContent = weights[c.key] + "%"; });
+    totalEl.textContent = "Total weight: " + tw + "%" + (tw === 100 ? " — balanced" : " (doesn't need to sum to 100 — relative weight is what matters)");
+    presetsEl.querySelectorAll(".chip").forEach(function (b, i) { b.classList.toggle("on", i === activePreset); });
+
+    var order = ranked(weights);
+    var max = order[0].score || 1;
+    var betsEl = document.getElementById("bets"); betsEl.innerHTML = "";
+    order.forEach(function (it, i) {
+      var d = topDriver(it.bet, weights);
+      var el = document.createElement("div"); el.className = "card" + (i === 0 ? " top" : "");
+      el.innerHTML = '<div class="bet-rank">Rank ' + (i + 1) + '</div><div class="bet-head"><div class="bet-name">' + it.bet.name + '</div><div class="bet-score">' + it.score.toFixed(2) + ' / 10</div></div>'
+        + '<div class="bet-desc">' + it.bet.desc + '</div><div class="bar-track"><div class="bar-fill" style="width:' + (it.score / max * 100) + '%"></div></div>'
+        + '<div class="bet-why">Biggest contributor under these weights: ' + d.label.toLowerCase() + ' (' + it.bet.scores[d.key] + '/10).</div>';
+      betsEl.appendChild(el);
+    });
+    renderFlip(order);
+    if (!skipTable) renderTable();
+  }
+  render();
+})();
+</script>
+</body>
+</html>
